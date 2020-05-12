@@ -2,6 +2,13 @@
 -- This uses the GPS API!
 -- The aim is to dig straight down :o
 -- then, mine at y=11 for diamonds, gold, redstone
+--
+-- This was made by SGunner2017
+-- This uses the aeslua API by SquidDev
+--
+-- failure conditions:
+-- 1) inventory full
+-- 2) run out of fuel
 
 -- Define some constants
 local DIR_DOWN = 0
@@ -148,7 +155,7 @@ local function branch(stack, dir)
             turtle.dig()
         end
 
-        if turtle.getFuelLevel() <= (stack:count() + 2) then
+        if shouldEnd(stack) then
             return stack, false
         end
 
@@ -169,6 +176,61 @@ local function broadcastEvent(modem, event)
     local text = textutils.serializeJSON(event)
     aes.encrypt(encrypt_key, text)
     modem.transmit(1810, 1810, text)
+end
+
+-- Ditches all items not in interested_blocks
+local function ditchUselessItems()
+    local data
+
+    -- Scan through the slots and drop all useless items
+    for i = 1, 16 do
+        data = turtle.getItemDetail(i)
+        if not listContains(interested_items, data.name) then -- ditch items
+            turtle.select(i)
+            turtle.drop()
+        end
+    end
+end
+
+-- Returns true if the inventory is sufficiently full to return to base
+local function invSpaceFull()
+    local data
+    local slotsFull = true
+    
+    -- Scan through slots, return true if all slots have items & any are @ 64
+    for i = 1, 16 do
+        if not turtle.getItemDetail() then
+            slotsFull = false
+            break
+        end
+    end
+
+    -- Only check remaining space 
+    if not slotsFull then
+        return false
+    end
+
+    -- Check if we have any @ 64
+    for i = 1, 16 do
+        if turtle.getItemCount(i) == 64 then
+            return true
+        end
+    end
+
+    return false
+end
+
+-- Returns 0 if can carry on
+-- Returns 1 if no inv space left
+-- Returns 2 if no fuel
+local function shouldEnd(stack)
+    if turtle.getFuelLevel() < (stack:count() + 2) then
+        return 2
+    elseif invSpaceFull() then
+        return 1
+    else
+        return 0
+    end
 end
 
 local function main()
@@ -193,7 +255,7 @@ local function main()
 
     -- Now we can do some strip-mining
     -- We're going to dig a straight path with branches off of the side with length 16.
-    while turtle.getFuelLevel() > (path_taken:count() + 2) do -- 2 for some wiggle room
+    while not shouldEnd(stack) do -- 2 for some wiggle room
         
         path_taken, success = branch(path_taken, 1)
         if not success then -- we need to return to base, presumably for fuel.
@@ -223,7 +285,7 @@ local function main()
         end
 
         -- only carry on if we have enough fuel
-        if turtle.getFuelLevel() <= (path_taken:count() + 2) then
+        if shouldEnd(stack) then
             broadcastEvent(modem, {
                 status = "REVERSING",
                 message = "The turtle has run out of fuel and is returning to base..."
