@@ -174,7 +174,7 @@ end
 local function main()
     local x, y, z = gps.locate()
     local path_taken = stack:new()
-    local modem = peripheral.wrap("right")
+    local modem = peripheral.wrap(modem_side)
     os.loadAPI("aes.lua")
 
     broadcastEvent(modem, {
