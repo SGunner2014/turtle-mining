@@ -137,6 +137,41 @@ local function reverse(stack, count)
     return stack
 end
 
+-- Returns true if the inventory is sufficiently full to return to base
+local function invSpaceFull()
+    -- Scan through slots, return true if all slots have items & any are @ 64
+    for i = 1, 16 do
+        if not turtle.getItemDetail(i) then
+            return false
+        end
+    end
+
+    -- Check if we have any @ 64
+    for i = 1, 16 do
+        if turtle.getItemCount(i) == 64 then
+            return true
+        end
+    end
+
+    return false
+end
+
+-- Returns 0 if can carry on
+-- Returns 1 if no inv space left
+-- Returns 2 if no fuel
+local function shouldEnd(stack)
+    print("inv space: " .. tostring(invSpaceFull()))
+
+    if turtle.getFuelLevel() <= (stack:count() + 2) then
+        return 2
+    elseif invSpaceFull() then
+        return 1
+    else
+        return false
+    end
+end
+
+-- Branches to one side or the other
 local function branch(stack, dir)
     count = 0
 
@@ -192,40 +227,6 @@ local function ditchUselessItems()
     end
 end
 
--- Returns true if the inventory is sufficiently full to return to base
-local function invSpaceFull()
-    -- Scan through slots, return true if all slots have items & any are @ 64
-    for i = 1, 16 do
-        if not turtle.getItemDetail(i) then
-            return false
-        end
-    end
-
-    -- Check if we have any @ 64
-    for i = 1, 16 do
-        if turtle.getItemCount(i) == 64 then
-            return true
-        end
-    end
-
-    return false
-end
-
--- Returns 0 if can carry on
--- Returns 1 if no inv space left
--- Returns 2 if no fuel
-local function shouldEnd(stack)
-    print("inv space: " .. tostring(invSpaceFull()))
-
-    if turtle.getFuelLevel() <= (stack:count() + 2) then
-        return 2
-    elseif invSpaceFull() then
-        return 1
-    else
-        return false
-    end
-end
-
 local function main()
     local x, y, z = gps.locate()
     local path_taken = stack:new()
@@ -251,6 +252,7 @@ local function main()
     while not shouldEnd(stack) do -- 2 for some wiggle room
         
         path_taken, success = branch(path_taken, 1)
+        ditchUselessItems()
         if not success then -- we need to return to base, presumably for fuel.
             broadcastEvent(modem, {
                 status = "REVERSING",
@@ -264,6 +266,7 @@ local function main()
             break
         end
         path_taken, success = branch(path_taken, -1)
+        ditchUselessItems()
         if not success then -- we need to return to base, presumably for fuel.
             broadcastEvent(modem, {
                 status = "REVERSING",
