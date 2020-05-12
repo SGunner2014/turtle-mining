@@ -161,7 +161,11 @@ local function branch(stack, dir)
 end
 
 -- Broadcasts a message to listening computers.
+-- Injects some useful data to the listener
 local function broadcastEvent(modem, event)
+    event["id"] = os.getComputerID()
+    event["label"] = os.getComputerLabel()
+    event["fuel"] = turtle.getFuelLevel()
     local text = textutils.serializeJSON(event)
     aes.encrypt(encrypt_key, text)
     modem.transmit(1810, 1810, text)
@@ -173,6 +177,10 @@ local function main()
     local modem = peripheral.wrap("right")
     os.loadAPI("aes.lua")
 
+    broadcastEvent(modem, {
+        status = "INITIALISING",
+        message = "This turtle is initialising and reaching the initial y-value needed."
+    })
     -- Move down to the mining level we want
     for i = 1, (y - 11) do
         -- Only dig the block beneath us if we really need to.
@@ -186,23 +194,45 @@ local function main()
     -- Now we can do some strip-mining
     -- We're going to dig a straight path with branches off of the side with length 16.
     while turtle.getFuelLevel() > (path_taken:count() + 2) do -- 2 for some wiggle room
+        
         path_taken, success = branch(path_taken, 1)
-        if DEBUG_INFO then print("branching to the left") end
         if not success then -- we need to return to base, presumably for fuel.
+            broadcastEvent(modem, {
+                status = "REVERSING",
+                message = "The turtle has run out of fuel and is returning to base..."
+            })
             path_taken = reverse(path_taken, path_taken:count())
+            broadcastEvent(modem, {
+                status = "END",
+                message = "The turtle has run out of fuel and has returned."
+            })
             break
         end
         path_taken, success = branch(path_taken, -1)
-        if DEBUG_INFO then print("branching to the right") end
         if not success then -- we need to return to base, presumably for fuel.
+            broadcastEvent(modem, {
+                status = "REVERSING",
+                message = "The turtle has run out of fuel and is returning to base..."
+            })
             path_taken = reverse(path_taken, path_taken:count())
+            broadcastEvent(modem, {
+                status = "END",
+                message = "The turtle has run out of fuel and has returned."
+            })
             break
         end
 
         -- only carry on if we have enough fuel
         if turtle.getFuelLevel() <= (path_taken:count() + 2) then
-            if DEBUG_INFO then print("out of fuel, reversing to beginning") end
+            broadcastEvent(modem, {
+                status = "REVERSING",
+                message = "The turtle has run out of fuel and is returning to base..."
+            })
             path_taken = reverse(path_taken, path_taken:count())
+            broadcastEvent(modem, {
+                status = "END",
+                message = "The turtle has run out of fuel and has returned."
+            })
             break
         end
 
