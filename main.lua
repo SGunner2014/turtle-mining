@@ -215,7 +215,7 @@ end
 -- Returns 1 if no inv space left
 -- Returns 2 if no fuel
 local function shouldEnd(stack)
-    print("inv space: " .. invSpaceFull())
+    print("inv space: " .. tostring(invSpaceFull()))
 
     if turtle.getFuelLevel() <= (stack:count() + 2) then
         return 2
