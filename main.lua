@@ -220,14 +220,12 @@ local function ditchUselessItems()
     -- Scan through the slots and drop all useless items
     for i = 1, 16 do
         data = turtle.getItemDetail(i)
-        if data == nil then goto continue end
-            
-        if not listContains(interested_blocks, data.name) then -- ditch items
-            turtle.select(i)
-            turtle.drop()
+        if data ~= nil then
+            if not listContains(interested_blocks, data.name) then -- ditch items
+                turtle.select(i)
+                turtle.drop()
+            end
         end
-
-        ::continue::
     end
 end
 
