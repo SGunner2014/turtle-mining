@@ -194,20 +194,11 @@ end
 
 -- Returns true if the inventory is sufficiently full to return to base
 local function invSpaceFull()
-    local data
-    local slotsFull = true
-    
     -- Scan through slots, return true if all slots have items & any are @ 64
     for i = 1, 16 do
-        if not turtle.getItemDetail() then
-            slotsFull = false
-            break
+        if not turtle.getItemDetail(i) then
+            return false
         end
-    end
-
-    -- Only check remaining space 
-    if not slotsFull then
-        return false
     end
 
     -- Check if we have any @ 64
@@ -224,12 +215,12 @@ end
 -- Returns 1 if no inv space left
 -- Returns 2 if no fuel
 local function shouldEnd(stack)
-    if turtle.getFuelLevel() < (stack:count() + 2) then
+    if turtle.getFuelLevel() <= (stack:count() + 2) then
         return 2
     elseif invSpaceFull() then
         return 1
     else
-        return 0
+        return false
     end
 end
 
