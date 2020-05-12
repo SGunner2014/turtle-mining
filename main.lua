@@ -17,6 +17,8 @@ local interested_blocks = {
     "minecraft:coal_ore"
 }
 local DEBUG_INFO = true
+local modem_side = "right"
+local encrypt_key = "samiscool"
 
 -- Emulate a stack, using a list
 local stack = {}
@@ -158,9 +160,18 @@ local function branch(stack, dir)
     return reverse(stack, count), true
 end
 
+-- Broadcasts a message to listening computers.
+local function broadcastEvent(modem, event)
+    local text = textutils.serializeJSON(event)
+    aes.encrypt(encrypt_key, text)
+    modem.transmit(1810, 1810, text)
+end
+
 local function main()
     local x, y, z = gps.locate()
     local path_taken = stack:new()
+    local modem = peripheral.wrap("right")
+    os.loadAPI("aes")
 
     -- Move down to the mining level we want
     for i = 1, (y - 11) do
