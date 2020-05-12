@@ -13,8 +13,10 @@ local TURN_RIGHT = 7
 local interested_blocks = {
     "minecraft:diamond_ore",
     "minecraft:redstone_ore",
-    "minecraft:gold_ore"
+    "minecraft:gold_ore",
+    "minecraft:coal_ore"
 }
+local DEBUG_INFO = true
 
 -- Emulate a stack, using a list
 local stack = {}
@@ -174,11 +176,13 @@ local function main()
     -- We're going to dig a straight path with branches off of the side with length 16.
     while turtle.getFuelLevel() > (path_taken:count() + 2) do -- 2 for some wiggle room
         path_taken, success = branch(path_taken, 1)
+        if DEBUG_INFO then print("branching to the left") end
         if not success then -- we need to return to base, presumably for fuel.
             path_taken = reverse(path_taken, path_taken:count())
             break
         end
         path_taken, success = branch(path_taken, -1)
+        if DEBUG_INFO then print("branching to the right") end
         if not success then -- we need to return to base, presumably for fuel.
             path_taken = reverse(path_taken, path_taken:count())
             break
@@ -186,6 +190,7 @@ local function main()
 
         -- only carry on if we have enough fuel
         if turtle.getFuelLevel() <= (path_taken:count() + 2) then
+            if DEBUG_INFO then print("out of fuel, reversing to beginning") end
             path_taken = reverse(path_taken, path_taken:count())
             break
         end
@@ -200,4 +205,5 @@ local function main()
     end
 end
 
+-- run the program
 main()
