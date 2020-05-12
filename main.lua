@@ -17,7 +17,7 @@ local interested_blocks = {
     "minecraft:coal_ore"
 }
 local DEBUG_INFO = true
-local modem_side = "right"
+local modem_side = "left"
 local encrypt_key = "samiscool"
 
 -- Emulate a stack, using a list
