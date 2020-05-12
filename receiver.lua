@@ -1,6 +1,6 @@
 local modem_side = "right"
 local encrypt_key = "samiscool"
-os.loadAPI("aes")
+os.loadAPI("aes.lua")
 
 local function main()
     local mod = peripheral.wrap(modem_side)
@@ -12,3 +12,5 @@ local function main()
         end
     end
 end
+
+main()

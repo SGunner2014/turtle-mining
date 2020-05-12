@@ -171,7 +171,7 @@ local function main()
     local x, y, z = gps.locate()
     local path_taken = stack:new()
     local modem = peripheral.wrap("right")
-    os.loadAPI("aes")
+    os.loadAPI("aes.lua")
 
     -- Move down to the mining level we want
     for i = 1, (y - 11) do
