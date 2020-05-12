@@ -19,7 +19,7 @@ local TURN_LEFT = 6
 local TURN_RIGHT = 7
 local interested_blocks = {
     "minecraft:diamond_ore",
-    "minecraft:redstone_ore",
+    "minecraft:redstone",
     "minecraft:gold_ore",
     "minecraft:coal_ore"
 }
@@ -220,10 +220,14 @@ local function ditchUselessItems()
     -- Scan through the slots and drop all useless items
     for i = 1, 16 do
         data = turtle.getItemDetail(i)
+        if not data then goto continue end
+            
         if not listContains(interested_blocks, data.name) then -- ditch items
             turtle.select(i)
             turtle.drop()
         end
+
+        ::continue::
     end
 end
 
