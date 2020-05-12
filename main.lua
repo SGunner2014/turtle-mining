@@ -18,10 +18,10 @@ local DIR_BACK = 5
 local TURN_LEFT = 6
 local TURN_RIGHT = 7
 local interested_blocks = {
-    "minecraft:diamond_ore",
+    "minecraft:diamond",
     "minecraft:redstone",
     "minecraft:gold_ore",
-    "minecraft:coal_ore"
+    "minecraft:coal"
 }
 local DEBUG_INFO = true
 local modem_side = "left"
