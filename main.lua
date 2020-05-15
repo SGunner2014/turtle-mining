@@ -254,9 +254,15 @@ local function branch(stack, dir)
 
     -- Mine the block, ditch it if it's not (diamond, redstone, gold)
     for i = 1, 16 do
-        -- account for gravel, sand
-        while turtle.getFuelLevel() > (stack:count() + 2) do
+        -- Check if there's a vein we need to mine
+        local blockInfo = {turtle.inspect()}
+        if listContains(interested_blocks, blockInfo[2].name) then
             mineOreVein(stack, g_stack:new())
+        end
+
+        -- account for gravel, sand
+        while turtle.inspect() and turtle.getFuelLevel() > (stack:count() + 2) do
+            turtle.dig()
         end
 
         if shouldEnd(stack) then
