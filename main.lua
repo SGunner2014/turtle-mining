@@ -182,7 +182,8 @@ local function mineOre(direction, stack, vein_path)
         vein_path = move(vein_path, direction)
         count = count + 1
     elseif direction == DIR_DOWN then -- if it's down or up, we can inspect, mine and move!
-        if listContains(interested_blocks, {turtle.inspectDown()}[2].name) then
+        local blockInfo = {turtle.inspectDown()}
+        if listContains(interested_blocks, blockInfo[2].name) then
             while turtle.inspectDown() do -- sand, gravel
                 turtle.digDown()
             end
@@ -190,7 +191,8 @@ local function mineOre(direction, stack, vein_path)
             vein_path = mineOreVein(stack, vein_path)
         end
     elseif direction == DIR_UP then
-        if listContains(interested_blocks, {turtle.inspectUp()}[2].name) then
+        local blockInfo = {turtle.inspectUp()}
+        if listContains(interested_blocks, blockInfo[2].name) then
             while turtle.inspectUp() do -- sand, gravel
                 turtle.digUp()
             end
@@ -202,7 +204,8 @@ local function mineOre(direction, stack, vein_path)
 
     if listContains({DIR_FORWARD, TURN_LEFT, TURN_RIGHT}, direction) then
         -- We should be facing in the right direction to check forward.
-        if listContains(interested_blocks, {turtle.inspect()}[2].name) then
+        local blockInfo = {turtle.inspect()}
+        if listContains(interested_blocks, blockInfo[2].name) then
             while turtle.inspect() do -- sand, gravel
                 turtle.dig()
             end
