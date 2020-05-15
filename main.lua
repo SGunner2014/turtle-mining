@@ -187,7 +187,7 @@ local function mineOre(direction, stack, vein_path)
             while turtle.inspectDown() do -- sand, gravel
                 turtle.digDown()
             end
-            vein_path = turtle.move(vein_path, DIR_DOWN)
+            vein_path = move(vein_path, DIR_DOWN)
             vein_path = mineOreVein(stack, vein_path)
         end
     elseif direction == DIR_UP then
@@ -196,7 +196,7 @@ local function mineOre(direction, stack, vein_path)
             while turtle.inspectUp() do -- sand, gravel
                 turtle.digUp()
             end
-            vein_path = turtle.move(vein_path, DIR_UP) -- move into position and repeat all over again
+            vein_path = move(vein_path, DIR_UP) -- move into position and repeat all over again
             vein_path = mineOreVein(stack, vein_path)
             count = count + 1
         end
@@ -209,7 +209,7 @@ local function mineOre(direction, stack, vein_path)
             while turtle.inspect() do -- sand, gravel
                 turtle.dig()
             end
-            vein_path = turtle.move(vein_path, DIR_UP)
+            vein_path = move(vein_path, DIR_UP)
             vein_path = mineOreVein(stack, vein_path)
             count = count + 1
         end
