@@ -234,7 +234,7 @@ local function mineOreVein(stack, vein_path)
 
     -- Mine in each direction and terminate if we should end
     for i = 1, #directions do
-        vein_path, terminate = mineOre(directions[i], vein_path)
+        vein_path, terminate = mineOre(directions[i], stack, vein_path)
     end
 
     return vein_path
