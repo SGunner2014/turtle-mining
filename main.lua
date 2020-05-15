@@ -69,6 +69,7 @@ function stack:count()
     if self.items == nil then return 0 end
     return #self.items
 end
+g_stack = stack
 
 -- returns the opposite to the direction supplied.
 local function getOppositeDir(dir)
@@ -171,6 +172,69 @@ local function shouldEnd(stack)
     end
 end
 
+-- Mines the ore to the direction specified
+local function mineOre(direction, stack, vein_path)
+    local count = 0
+
+    if direction == TURN_LEFT or direction == TURN_RIGHT then -- move into position if it's either of these.
+        vein_path = move(vein_path, direction)
+        count = count + 1
+    elseif direction == DIR_DOWN then -- if it's down or up, we can inspect, mine and move!
+        if listContains(interested_blocks, turtle.inspectDown().name) then
+            while turtle.inspectDown() do -- sand, gravel
+                turtle.digDown()
+            end
+            vein_path = turtle.move(vein_path, DIR_DOWN)
+            vein_path = mineOreVein(stack, vein_path)
+        end
+    elseif direction == DIR_UP then
+        if listContains(interested_blocks, turtle.inspectUp().name) then
+            while turtle.inspectUp() do -- sand, gravel
+                turtle.digUp()
+            end
+            vein_path = turtle.move(vein_path, DIR_UP) -- move into position and repeat all over again
+            vein_path = mineOreVein(stack, vein_path)
+            count = count + 1
+        end
+    end
+
+    if listContains({DIR_FORWARD, TURN_LEFT, TURN_RIGHT}, direction) then
+        -- We should be facing in the right direction to check forward.
+        if listContains(interested_blocks, turtle.inspect().name) then
+            while turtle.inspect() do -- sand, gravel
+                turtle.dig()
+            end
+            vein_path = turtle.move(vein_path, DIR_UP)
+            vein_path = mineOreVein(stack, vein_path)
+            count = count + 1
+        end
+    end
+
+    -- Reverse back to where we started
+    vein_path = reverse(vein_path, count)
+    return vein_path
+end
+
+-- Attempts to mine a connected vein of ores in a recursive fashion.
+local function mineOreVein(stack, vein_path)
+    -- stack is the path taken up until when we encountered the ore patch.
+    -- vein_path is the path that we have taken in the ore vein so far.
+    local directions = {
+        DIR_FORWARD,
+        TURN_LEFT,
+        TURN_RIGHT,
+        DIR_DOWN,
+        DIR_UP
+    }
+
+    -- Mine in each direction and terminate if we should end
+    for i = 1, #directions do
+        vein_path, terminate = mineOre(directions[i], vein_path)
+    end
+
+    return vein_path
+end
+
 -- Branches to one side or the other
 local function branch(stack, dir)
     count = 0
@@ -186,8 +250,8 @@ local function branch(stack, dir)
     -- Mine the block, ditch it if it's not (diamond, redstone, gold)
     for i = 1, 16 do
         -- account for gravel, sand
-        while turtle.inspect() and turtle.getFuelLevel() > (stack:count() + 2) do
-            turtle.dig()
+        while turtle.getFuelLevel() > (stack:count() + 2) do
+            mineOreVein(stack, g_stack:new())
         end
 
         if shouldEnd(stack) then
