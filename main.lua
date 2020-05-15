@@ -117,6 +117,8 @@ end
 
 -- Checks if a list contains a value
 local function listContains(list, val)
+    if val == nil then return false end
+
     for i = 1, #list do
         if list[i] == val then
             return true
